@@ -1,0 +1,4 @@
+ARM6581 To do
+--------------
+
+	Make core completly objectified.
