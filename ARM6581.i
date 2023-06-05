@@ -6,40 +6,57 @@
 	.struct 0					;@ Changes section so make sure it is set before real code.
 m6581Start:
 m6581StateStart:
-m6581ch1freq:		.byte 0,0
-m6581ch1pulsew:		.byte 0,0
-m6581ch1ctrl:		.byte 0
-m6581ch1ad:			.byte 0		;@ Attack/Decay
-m6581ch1sr:			.byte 0		;@ Sustain/Release
-m6581ch2freq:		.byte 0,0
-m6581ch2pulsew:		.byte 0,0
-m6581ch2ctrl:		.byte 0
-m6581ch2ad:			.byte 0		;@ Attack/Decay
-m6581ch2sr:			.byte 0		;@ Sustain/Release
-m6581ch3freq:		.byte 0,0
-m6581ch3pulsew:		.byte 0,0
-m6581ch3ctrl:		.byte 0
-m6581ch3ad:			.byte 0		;@ Attack/Decay
-m6581ch3sr:			.byte 0		;@ Sustain/Release
-m6581filterfreq:		.byte 0,0
-m6581filterctrl:		.byte 0		;@ Filter
-m6581filtermode:		.byte 0		;@ Filtermode/volume
-m6581paddle1:		.byte 0
-m6581paddle2:		.byte 0
-m6581osc3rnd:		.byte 0
-m6581env3out:		.byte 0
-m6581unused:			.byte 0,0,0
+m6581Ch1Freq:
+m6581Ch1FreqLo:		.byte 0
+m6581Ch1FreqHi:		.byte 0
+m6581Ch1PulseW:
+m6581Ch1PulseWLo:	.byte 0
+m6581Ch1PulseWHi:	.byte 0
+m6581Ch1Ctrl:		.byte 0
+m6581Ch1AD:			.byte 0		;@ Attack/Decay
+m6581Ch1SR:			.byte 0		;@ Sustain/Release
 
-m6581ch1counter:		.long 0
-m6581ch2counter:		.long 0
-m6581ch3counter:		.long 0
-m6581ch1envelope:	.long 0
-m6581ch2envelope:	.long 0
-m6581ch3envelope:	.long 0
-m6581ch1noise:		.long 0
-m6581ch2noise:		.long 0
-m6581ch3noise:		.long 0
-m6581ch3noise_r:		.long 0
+m6581Ch2Freq:
+m6581Ch2FreqLo:		.byte 0
+m6581Ch2FreqHi:		.byte 0
+m6581Ch2PulseW:
+m6581Ch2PulseWLo:	.byte 0
+m6581Ch2PulseWHi:	.byte 0
+m6581Ch2Ctrl:		.byte 0
+m6581Ch2AD:			.byte 0		;@ Attack/Decay
+m6581Ch2SR:			.byte 0		;@ Sustain/Release
+
+m6581Ch3Freq:
+m6581Ch3FreqLo:		.byte 0
+m6581Ch3FreqHi:		.byte 0
+m6581Ch3PulseW:
+m6581Ch3PulseWLo:	.byte 0
+m6581Ch3PulseWHi:	.byte 0
+m6581Ch3Ctrl:		.byte 0
+m6581Ch3AD:			.byte 0		;@ Attack/Decay
+m6581Ch3SR:			.byte 0		;@ Sustain/Release
+
+m6581FilterFreq:
+m6581FilterFreqLo:	.byte 0
+m6581FilterFreqHi:	.byte 0
+m6581FilterCtrl:	.byte 0		;@ Filter
+m6581FilterMode:	.byte 0		;@ Filtermode/volume
+m6581Paddle1:		.byte 0
+m6581Paddle2:		.byte 0
+m6581Osc3Rnd:		.byte 0
+m6581Env3Out:		.byte 0
+m6581Unused:		.skip 3
+
+m6581Ch1Counter:	.long 0
+m6581Ch2Counter:	.long 0
+m6581Ch3Counter:	.long 0
+m6581Ch1Envelope:	.long 0
+m6581Ch2Envelope:	.long 0
+m6581Ch3Envelope:	.long 0
+m6581Ch1Noise:		.long 0
+m6581Ch2Noise:		.long 0
+m6581Ch3Noise:		.long 0
+m6581Ch3Noise_r:	.long 0
 m6581End:
 
 m6581Size = m6581End-m6581Start

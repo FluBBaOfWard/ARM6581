@@ -6,40 +6,40 @@ extern "C" {
 #endif
 
 typedef struct {
-	u8 ch1freq[2];
-	u8 ch1pulsew[2];
-	u8 ch1ctrl;
-	u8 ch1ad;			// Attack/Decay
-	u8 ch1sr;			// Sustain/Release
-	u8 ch2freq[2];
-	u8 ch2pulsew[2];
-	u8 ch2ctrl;
-	u8 ch2ad;			// Attack/Decay
-	u8 ch2sr;			// Sustain/Release
-	u8 ch3freq[2];
-	u8 ch3pulsew[2];
-	u8 ch3ctrl;
-	u8 ch3ad;			// Attack/Decay
-	u8 ch3sr;			// Sustain/Release
-	u8 filterfreq[2];
-	u8 filterctrl;		// Filter
-	u8 filtermode;		// Filtermode/volume
+	u8 ch1Freq[2];
+	u8 ch1PulseW[2];
+	u8 ch1Ctrl;
+	u8 ch1AD;			// Attack/Decay
+	u8 ch1SR;			// Sustain/Release
+	u8 ch2Freq[2];
+	u8 ch2PulseW[2];
+	u8 ch2Ctrl;
+	u8 ch2AD;			// Attack/Decay
+	u8 ch2SR;			// Sustain/Release
+	u8 ch3Freq[2];
+	u8 ch3PulseW[2];
+	u8 ch3Ctrl;
+	u8 ch3AD;			// Attack/Decay
+	u8 ch3SR;			// Sustain/Release
+	u8 filterFreq[2];
+	u8 filterCtrl;		// Filter
+	u8 filterMode;		// Filtermode/volume
 	u8 paddle1;
 	u8 paddle2;
-	u8 osc3rnd;
-	u8 env3out;
+	u8 osc3Rnd;
+	u8 env3Out;
 	u8 unused[3];
 
-	u32 ch1counter;
-	u32 ch2counter;
-	u32 ch3counter;
-	u32 ch1envelope;
-	u32 ch2envelope;
-	u32 ch3envelope;
-	u32 ch1noise;
-	u32 ch2noise;
-	u32 ch3noise;
-	u32 ch3noise_r;
+	u32 ch1Counter;
+	u32 ch2Counter;
+	u32 ch3Counter;
+	u32 ch1Envelope;
+	u32 ch2Envelope;
+	u32 ch3Envelope;
+	u32 ch1Noise;
+	u32 ch2Noise;
+	u32 ch3Noise;
+	u32 ch3Noise_r;
 
 } M6581;
 
