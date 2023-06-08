@@ -18,7 +18,7 @@
 //#define PFEED	0x4000			;@ Periodic Noise Feedback
 
 //#define PCMWAVSIZE				312
-#define PCMWAVSIZE				528
+#define PCMWAVSIZE				720
 
 	.syntax unified
 	.arm
@@ -324,12 +324,13 @@ releaseLen:
 	.long 0x01400000,0x00500000,0x00280000,0x001A0000,0x00126564,0x000C7BA8,0x000A47B8,0x0008BCF4
 	.long 0x0006FD90,0x0002CBD0,0x000165E0,0x0000DFB0,0x0000AAA8,0x00003B54,0x000023A8,0x00001554
 ;@----------------------------------------------------------------------------
-SID_StartMixer:
+SID_StartMixer:			;@ r0=length, r1=pointer
 ;@----------------------------------------------------------------------------
 	;@ Update DMA buffer for PCM
 
-	stmfd sp!,{r3-r12,lr}
-	str r0,pcmptr
+	stmfd sp!,{r4-r12,lr}
+	str r0,mixLength
+	str r1,pcmptr
 
 	ldr r0,ch3Noise
 	str r0,ch3Noise_r
@@ -469,7 +470,7 @@ SID_StartMixer:
 	bl mixChannels
 
 
-	ldmfd sp!,{r3-r12,pc}
+	ldmfd sp!,{r4-r12,pc}
 ;@----------------------------------------------------------------------------
 mixerSelect:
 	tst r0,#0x08
