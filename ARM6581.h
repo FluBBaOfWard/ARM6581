@@ -1,3 +1,11 @@
+//
+//  ARM6581.h
+//  MOS 6581 "SID" chip emulator for ARM32.
+//
+//  Created by Fredrik Ahlström on 2006-12-01.
+//  Copyright © 2006-2023 Fredrik Ahlström. All rights reserved.
+//
+
 #ifndef ARM6581_HEADER
 #define ARM6581_HEADER
 

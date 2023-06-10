@@ -1,3 +1,10 @@
+//
+//  ARM6581.i
+//  MOS 6581 "SID" chip emulator for ARM32.
+//
+//  Created by Fredrik Ahlström on 2006-12-01.
+//  Copyright © 2006-2023 Fredrik Ahlström. All rights reserved.
+//
 
 				;@ r0,r1,r2=temp regs
 //	m6502nz		.req r3			;@ Bit 31=N, Z=1 if bits 0-7=0
