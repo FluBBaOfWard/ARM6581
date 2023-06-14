@@ -17,6 +17,10 @@
 	.global sidWrite
 	.global sidRead
 	.global SID_StartMixer
+	.global m6581SaveState
+	.global m6581LoadState
+	.global m6581GetStateSize
+
 	.global SoundVariables
 
 #define NSEED	0x7FFFF8		;@ Noise Seed
@@ -319,6 +323,37 @@ m6581Reset:
 	bl memset_						;@ Clear variables
 
 	ldmfd sp!,{lr}
+	bx lr
+
+;@----------------------------------------------------------------------------
+m6581SaveState:		;@ In r0=destination, r1=VICII chip. Out r0=state size.
+	.type m6581SaveState STT_FUNC
+;@----------------------------------------------------------------------------
+	adrl r1,SoundVariables
+	add r1,r1,#m6581StateStart
+	mov r2,#m6581StateSize
+	stmfd sp!,{r2,lr}
+	bl memcpy
+
+	ldmfd sp!,{r0,lr}
+	bx lr
+;@----------------------------------------------------------------------------
+m6581LoadState:		;@ In r0=VICII chip, r1=source. Out r0=state size.
+	.type m6581LoadState STT_FUNC
+;@----------------------------------------------------------------------------
+	stmfd sp!,{lr}
+
+	adrl r0,SoundVariables
+	add r0,r0,#m6581StateStart
+	mov r2,#m6581StateSize
+	bl memcpy
+
+	ldmfd sp!,{lr}
+;@----------------------------------------------------------------------------
+m6581GetStateSize:	;@ Out r0=state size.
+	.type m6581GetStateSize STT_FUNC
+;@----------------------------------------------------------------------------
+	mov r0,#m6581StateSize
 	bx lr
 
 ;@----------------------------------------------------------------------------

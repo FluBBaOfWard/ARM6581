@@ -61,7 +61,8 @@ void m6581Reset(const M6581 *chip);
  * @param  *chip: The M6581 chip to save.
  * @return The size of the state.
  */
-int m6581SaveState(void *destination, const M6581 *chip);
+int m6581SaveState(void *destination);
+//int m6581SaveState(void *destination, const M6581 *chip);
 
 /**
  * Loads the state of the M6581 chip from the source.
@@ -69,7 +70,8 @@ int m6581SaveState(void *destination, const M6581 *chip);
  * @param  *source: Where to load the state from.
  * @return The size of the state.
  */
-int m6581LoadState(M6581 *chip, const void *source);
+int m6581LoadState(const void *source);
+//int m6581LoadState(M6581 *chip, const void *source);
 
 /**
  * Gets the state size of a M6581.

@@ -64,6 +64,7 @@ m6581Ch1Noise:		.long 0
 m6581Ch2Noise:		.long 0
 m6581Ch3Noise:		.long 0
 m6581Ch3Noise_r:	.long 0
+m6581StateEnd:
 m6581End:
 
 m6581Size = m6581End-m6581Start
