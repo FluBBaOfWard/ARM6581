@@ -13,7 +13,6 @@
 	.global m6581Init
 	.global m6581Reset
 	.global frequency_reset
-	.global soundMode
 	.global sidWrite
 	.global sidRead
 	.global SID_StartMixer
@@ -21,16 +20,13 @@
 	.global m6581LoadState
 	.global m6581GetStateSize
 
-	.global SoundVariables
-
 #define NSEED	0x7FFFF8		;@ Noise Seed
 
 								;@ These values are for the SN76496 sound chip.
 //#define WFEED	0x6000			;@ White Noise Feedback
 //#define PFEED	0x4000			;@ Periodic Noise Feedback
 
-//#define PCMWAVSIZE				312
-#define PCMWAVSIZE				720
+#define PCMWAVSIZE				640
 
 	.syntax unified
 	.arm
@@ -304,11 +300,6 @@ m6581Init:
 ;@----------------------------------------------------------------------------
 	stmfd sp!,{lr}
 
-	ldr r3,mixRate					;@ 924=Low, 532=High.
-	mov r2,#0x10000					;@ Frequency = 0
-	sub r0,r2,r3					;@ Frequency = 0x1000000/r3 Hz
-	orr r0,r0,#0x800000				;@ Timer 0 on
-//	str r0,[r1],#4
 	mov r0,#0
 
 	ldmfd sp!,{lr}
@@ -321,6 +312,12 @@ m6581Reset:
 	mov r1,#0
 	mov r2,#14						;@ 56/4=14
 	bl memset_						;@ Clear variables
+
+	ldr r1,=NSEED
+	str r1,[r0,#m6581Ch1Noise]
+	str r1,[r0,#m6581Ch2Noise]
+	str r1,[r0,#m6581Ch3Noise]
+	str r1,[r0,#m6581Ch3Noise_r]
 
 	ldmfd sp!,{lr}
 	bx lr
@@ -375,10 +372,10 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 	str r0,mixLength
 	str r1,pcmptr
 
-	ldr r0,ch3Noise
-	str r0,ch3Noise_r
-;@--------------------------
 	ldr lr,=SoundVariables
+	ldr r0,[lr,#m6581Ch3Noise]
+	str r0,[lr,#m6581Ch3Noise_r]
+;@--------------------------
 	ldrb r9,[lr,#m6581Ch1FreqLo]
 	ldrb r0,[lr,#m6581Ch1FreqHi]
 	orr r9,r9,r0,lsl#8
@@ -402,9 +399,9 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 	and r0,r0,#0xF0
 	mov r6,r0,lsl#24
 
-	ldr r2,ch1Noise
-	ldr r8,ch1Envelope
-	ldr r10,ch1Counter
+	ldr r2,[lr,#m6581Ch1Noise]
+	ldr r8,[lr,#m6581Ch1Envelope]
+	ldr r10,[lr,#m6581Ch1Counter]
 	ldr r11,mixLength
 	ldr r12,sidptr
 
@@ -413,12 +410,12 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 	biceq r8,r8,#0x03
 	orrne r8,r8,#0x01
 	bl mixerSelect
-	str r2,ch1Noise
-	str r8,ch1Envelope
-	str r10,ch1Counter
+	ldr lr,=SoundVariables
+	str r2,[lr,#m6581Ch1Noise]
+	str r8,[lr,#m6581Ch1Envelope]
+	str r10,[lr,#m6581Ch1Counter]
 
 ;@----------------------
-	ldr lr,=SoundVariables
 	ldrb r9,[lr,#m6581Ch2FreqLo]
 	ldrb r0,[lr,#m6581Ch2FreqHi]
 	orr r9,r9,r0,lsl#8
@@ -444,9 +441,9 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 	mov r6,r0,lsl#24
 
 
-	ldr r2,ch2Noise
-	ldr r8,ch2Envelope
-	ldr r10,ch2Counter
+	ldr r2,[lr,#m6581Ch2Noise]
+	ldr r8,[lr,#m6581Ch2Envelope]
+	ldr r10,[lr,#m6581Ch2Counter]
 	ldr r11,mixLength
 	ldr r12,sidptr
 	add r12,r12,#PCMWAVSIZE*2
@@ -456,12 +453,12 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 	biceq r8,r8,#0x03
 	orrne r8,r8,#0x01
 	bl mixerSelect
-	str r2,ch2Noise
-	str r8,ch2Envelope
-	str r10,ch2Counter
+	ldr lr,=SoundVariables
+	str r2,[lr,#m6581Ch2Noise]
+	str r8,[lr,#m6581Ch2Envelope]
+	str r10,[lr,#m6581Ch2Counter]
 
 ;@----------------------
-	ldr lr,=SoundVariables
 	ldrb r9,[lr,#m6581Ch3FreqLo]
 	ldrb r0,[lr,#m6581Ch3FreqHi]
 	orr r9,r9,r0,lsl#8
@@ -485,9 +482,9 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 	and r0,r0,#0xF0
 	mov r6,r0,lsl#24
 
-	ldr r2,ch3Noise
-	ldr r8,ch3Envelope
-	ldr r10,ch3Counter
+	ldr r2,[lr,#m6581Ch3Noise]
+	ldr r8,[lr,#m6581Ch3Envelope]
+	ldr r10,[lr,#m6581Ch3Counter]
 	ldr r11,mixLength
 	ldr r12,sidptr
 	add r12,r12,#PCMWAVSIZE*4
@@ -497,12 +494,12 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 	biceq r8,r8,#0x03
 	orrne r8,r8,#0x01
 	bl mixerSelect
-	str r2,ch3Noise
-	str r8,ch3Envelope
-	str r10,ch3Counter
+	ldr lr,=SoundVariables
+	str r2,[lr,#m6581Ch3Noise]
+	str r8,[lr,#m6581Ch3Envelope]
+	str r10,[lr,#m6581Ch3Counter]
 ;@----------------------------------------------------------------------------
 
-	ldr lr,=SoundVariables
 	ldrb r3,[lr,#m6581FilterMode]
 	and r3,r3,#0x0F				;@ Main Volume
 	ldr r11,mixLength
@@ -546,29 +543,29 @@ sidWrite:
 setCtrl1:
 	tst r0,#0x08
 	ldrne r1,=NSEED
-	strne r1,ch1Noise
+	strne r1,[r2,#m6581Ch1Noise]
 	tst r0,#0x01
-	ldr r1,ch1Envelope
+	ldr r1,[r2,#m6581Ch1Envelope]
 	biceq r1,r1,#3
-	str r1,ch1Envelope
+	str r1,[r2,#m6581Ch1Envelope]
 	bx lr
 setCtrl2:
 	tst r0,#0x08
 	ldrne r1,=NSEED
-	strne r1,ch2Noise
+	strne r1,[r2,#m6581Ch2Noise]
 	tst r0,#0x01
-	ldr r1,ch2Envelope
+	ldr r1,[r2,#m6581Ch2Envelope]
 	biceq r1,r1,#3
-	str r1,ch2Envelope
+	str r1,[r2,#m6581Ch2Envelope]
 	bx lr
 setCtrl3:
 	tst r0,#0x08
 	ldrne r1,=NSEED
-	strne r1,ch3Noise
+	strne r1,[r2,#m6581Ch3Noise]
 	tst r0,#0x01
-	ldr r1,ch3Envelope
+	ldr r1,[r2,#m6581Ch3Envelope]
 	biceq r1,r1,#3
-	str r1,ch3Envelope
+	str r1,[r2,#m6581Ch3Envelope]
 	bx lr
 
 ;@----------------------------------------------------------------------------
@@ -582,12 +579,13 @@ sidRead:
 ;@----------------------------------------------------------------------------
 SID_OSC3_R:
 ;@----------------------------------------------------------------------------
-	ldr r1,ch3Noise_r
+	adr r2,SoundVariables
+	ldr r1,[r2,#m6581Ch3Noise_r]
 	movcs r1,r1,lsl#1
 	eor r0,r1,r1,lsl#5
 	and r0,r0,#0x00400000
 	orr r1,r1,r0,lsr#22
-	str r1,ch3Noise_r
+	str r1,[r2,#m6581Ch3Noise_r]
 	mov r0,#0
 	tst r1,#0x00400000		;@ Bit 22
 	orrne r0,r0,#0x80
@@ -609,52 +607,46 @@ SID_OSC3_R:
 	bx lr
 ;@----------------------------------------------------------------------------
 SoundVariables:
-ch1Freq:		.byte 0,0
-ch1PulseW:		.byte 0,0
-ch1Ctrl:		.byte 0
-ch1AD:			.byte 0		;@ Attack/Decay
-ch1SR:			.byte 0		;@ Sustain/Release
-ch2Freq:		.byte 0,0
-ch2PulseW:		.byte 0,0
-ch2Ctrl:		.byte 0
-ch2AD:			.byte 0		;@ Attack/Decay
-ch2SR:			.byte 0		;@ Sustain/Release
-ch3Freq:		.byte 0,0
-ch3PulseW:		.byte 0,0
-ch3Ctrl:		.byte 0
-ch3AD:			.byte 0		;@ Attack/Decay
-ch3SR:			.byte 0		;@ Sustain/Release
-filterFreq:		.byte 0,0
-filterCtrl:		.byte 0		;@ Filter
-filterMode:		.byte 0		;@ Filtermode/volume
-paddle1:		.byte 0
-paddle2:		.byte 0
-osc3Rnd:		.byte 0
-env3Out:		.byte 0
-unused:			.skip 3
+		.byte 0,0
+		.byte 0,0
+		.byte 0
+		.byte 0		;@ Attack/Decay
+		.byte 0		;@ Sustain/Release
+		.byte 0,0
+		.byte 0,0
+		.byte 0
+		.byte 0		;@ Attack/Decay
+		.byte 0		;@ Sustain/Release
+		.byte 0,0
+		.byte 0,0
+		.byte 0
+		.byte 0		;@ Attack/Decay
+		.byte 0		;@ Sustain/Release
+		.byte 0,0
+		.byte 0		;@ Filter
+		.byte 0		;@ Filtermode/volume
+		.byte 0
+		.byte 0
+		.byte 0
+		.byte 0
+		.skip 3
 
-ch1Counter:		.long 0
-ch2Counter:		.long 0
-ch3Counter:		.long 0
-ch1Envelope:	.long 0
-ch2Envelope:	.long 0
-ch3Envelope:	.long 0
-ch1Noise:		.long NSEED
-ch2Noise:		.long NSEED
-ch3Noise:		.long NSEED
-ch3Noise_r:		.long NSEED
+		.long 0
+		.long 0
+		.long 0
+		.long 0
+		.long 0
+		.long 0
+		.long 0
+		.long 0
+		.long 0
+		.long 0
 
 
-mixLength:		.long PCMWAVSIZE	;@ Mixlength (528=high, 304=low)
+mixLength:		.long PCMWAVSIZE
 sidptr:			.long SIDWAV
 pcmptr:			.long SIDWAV
 ;@----------------------------------------------------------------------------
-
-mixRate:			.long 532		;@ Mixrate (532=high, 924=low), (mixRate=0x1000000/mixer_frequency)
-freqConvPAL:		.long 0x70788	;@ Frequency conversion (0x70788=high, 0xC3581=low) (3546893/mixer_frequency)*4096
-freqConvNTSC:		.long 0x71819	;@ Frequency conversion (0x71819=high, 0xC5247=low) (3579545/mixer_frequency)*4096
-freqConv:			.long 0
-soundMode:			.long 1		;@ Soundmode (OFF/ON)
 
 	.section .bss
 	.align 2
