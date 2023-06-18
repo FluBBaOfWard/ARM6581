@@ -14,21 +14,32 @@ extern "C" {
 #endif
 
 typedef struct {
-	u8 ch1Freq[2];
-	u8 ch1PulseW[2];
-	u8 ch1Ctrl;
-	u8 ch1AD;			// Attack/Decay
-	u8 ch1SR;			// Sustain/Release
-	u8 ch2Freq[2];
-	u8 ch2PulseW[2];
-	u8 ch2Ctrl;
-	u8 ch2AD;			// Attack/Decay
-	u8 ch2SR;			// Sustain/Release
-	u8 ch3Freq[2];
-	u8 ch3PulseW[2];
-	u8 ch3Ctrl;
-	u8 ch3AD;			// Attack/Decay
-	u8 ch3SR;			// Sustain/Release
+	/// Frequency, 16bit
+	u8 freq[2];
+	/// Pulse Width, 12bit
+	u8 pulseW[2];
+	/**
+	 * Bit 0 = Gate
+	 * Bit 1 = Sync
+	 * Bit 2 = Ring
+	 * Bit 3 = Test
+	 * Bit 4 = Triangle
+	 * Bit 5 = Saw
+	 * Bit 6 = Pulse
+	 * Bit 7 = Noise
+	 */
+	u8 ctrl;
+	/// Attack/Decay
+	u8 ad;
+	/// Sustain/Release
+	u8 sr;
+} M6581Channel;
+
+typedef struct {
+	M6581Channel ch1;
+	M6581Channel ch2;
+	M6581Channel ch3;
+	/// Filter Frequency, 11bit
 	u8 filterFreq[2];
 	u8 filterCtrl;		// Filter
 	u8 filterMode;		// Filtermode/volume

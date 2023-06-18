@@ -13,30 +13,34 @@
 	.struct 0					;@ Changes section so make sure it is set before real code.
 m6581Start:
 m6581StateStart:
-m6581Ch1Freq:
+m6581Channel1:
+m6581ChFreqLo:					;@ 0x00/0x07/0x0E Frequency Low
 m6581Ch1FreqLo:		.byte 0		;@ 0x00
+m6581ChFreqHi:					;@ 0x01/0x08/0x0F Frequency High
 m6581Ch1FreqHi:		.byte 0		;@ 0x01
-m6581Ch1PulseW:
+m6581ChPulseWLo:				;@ 0x02/0x09/0x10 Pulse Width Low
 m6581Ch1PulseWLo:	.byte 0		;@ 0x02
+m6581ChPulseWHi:				;@ 0x03/0x0A/0x11 Pulse Width High
 m6581Ch1PulseWHi:	.byte 0		;@ 0x03
+m6581ChCtrl:					;@ 0x04/0x0B/0x12 Control
 m6581Ch1Ctrl:		.byte 0		;@ 0x04
-m6581Ch1AD:			.byte 0		;@ 0x05 Attack/Decay
-m6581Ch1SR:			.byte 0		;@ 0x06 Sustain/Release
+m6581ChAD:						;@ 0x05/0x0C/0x13 Attack/Decay
+m6581Ch1AD:			.byte 0		;@ 0x05
+m6581ChSR:						;@ 0x06/0x0D/0x14 Sustain/Release
+m6581Ch1SR:			.byte 0		;@ 0x06
 
-m6581Ch2Freq:
+m6581Channel2:
 m6581Ch2FreqLo:		.byte 0		;@ 0x07
 m6581Ch2FreqHi:		.byte 0		;@ 0x08
-m6581Ch2PulseW:
 m6581Ch2PulseWLo:	.byte 0		;@ 0x09
 m6581Ch2PulseWHi:	.byte 0		;@ 0x0A
 m6581Ch2Ctrl:		.byte 0		;@ 0x0B
 m6581Ch2AD:			.byte 0		;@ 0x0C Attack/Decay
 m6581Ch2SR:			.byte 0		;@ 0x0D Sustain/Release
 
-m6581Ch3Freq:
+m6581Channel3:
 m6581Ch3FreqLo:		.byte 0		;@ 0x0E
 m6581Ch3FreqHi:		.byte 0		;@ 0x0F
-m6581Ch3PulseW:
 m6581Ch3PulseWLo:	.byte 0		;@ 0x10
 m6581Ch3PulseWHi:	.byte 0		;@ 0x11
 m6581Ch3Ctrl:		.byte 0		;@ 0x12
