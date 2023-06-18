@@ -38,6 +38,9 @@ typedef struct {
 	u8 env3Out;
 	u8 unused[3];
 
+	u8 lastWrite;
+	u8 padding[3];
+
 	u32 ch1Counter;
 	u32 ch2Counter;
 	u32 ch3Counter;

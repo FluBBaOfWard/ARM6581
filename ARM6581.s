@@ -22,10 +22,6 @@
 
 #define NSEED	0x7FFFF8		;@ Noise Seed
 
-								;@ These values are for the SN76496 sound chip.
-//#define WFEED	0x6000			;@ White Noise Feedback
-//#define PFEED	0x4000			;@ Periodic Noise Feedback
-
 #define PCMWAVSIZE				640
 
 	.syntax unified
@@ -35,17 +31,15 @@
 	.align 2
 ;@----------------------------------------------------------------------------
 
-;@ r0 = .
-;@ r1 = .
-;@ r2 = .
-;@ r3 = pulsewidth.
-
-
+;@ r0  = .
+;@ r1  = .
+;@ r2  = .
+;@ r3  = pulsewidth (12bit).
 ;@ r4  = attack.
 ;@ r5  = decay.
 ;@ r6  = sustain.
 ;@ r7  = release.
-;@ r8  = envelope. bit 0 & 1 = mode (adsr).
+;@ r8  = envelope (Top 8 bits). bit 0 & 1 = mode (adsr).
 ;@ r9  = frequency.
 ;@ r10 = counter.
 ;@ r11 = length.
@@ -55,10 +49,6 @@
 mixerPulse:
 ;@----------------------------------------------------------------------------
 	add r10,r10,r9,lsl#8+5
-	cmp r10,r3,lsl#20
-	mov r0,#0x000
-	movhi r0,#-1
-	mov r0,r0,lsr#20		;@ Pulse finnished.
 
 	ands r1,r8,#0x3
 	bne noReleaseP
@@ -78,11 +68,10 @@ noAttackP:
 	subs r8,r8,r5			;@ Decay/sustain mode
 	movcc r8,#3
 
-
 envDoneP:
-	mov r1,r8,lsr#24
-	mul r1,r0,r1			;@ Multiply pulse with envelope
-	mov r1,r1,lsr#4
+	cmp r10,r3,lsl#20
+	mov r1,#0
+	movcs r1,r8,lsr#16		;@ Use envelope directly for pulse
 	strh r1,[r12],#2
 
 	subs r11,r11,#1
@@ -90,6 +79,10 @@ envDoneP:
 
 	bx lr
 ;@----------------------------------------------------------------------------
+;@ r4  = attack.
+;@ r5  = decay.
+;@ r6  = sustain.
+;@ r7  = release.
 ;@ r8  = envelope.
 ;@ r9  = frequency.
 ;@ r10 = counter.
@@ -100,8 +93,6 @@ envDoneP:
 mixerSaw:
 ;@----------------------------------------------------------------------------
 	add r10,r10,r9,lsl#8+5
-	mov r0,r10,lsr#20		;@ Saw done.
-
 
 	ands r1,r8,#0x3
 	bne noReleaseS
@@ -122,6 +113,7 @@ noAttackS:
 	movcc r8,#3
 
 envDoneS:
+	mov r0,r10,lsr#20		;@ Saw done.
 	mov r1,r8,lsr#24
 	mul r1,r0,r1			;@ Multiply saw with envelope
 	mov r1,r1,lsr#4
@@ -132,6 +124,10 @@ envDoneS:
 
 	bx lr
 ;@----------------------------------------------------------------------------
+;@ r4  = attack.
+;@ r5  = decay.
+;@ r6  = sustain.
+;@ r7  = release.
 ;@ r8  = envelope.
 ;@ r9  = frequency.
 ;@ r10 = counter.
@@ -142,9 +138,6 @@ envDoneS:
 mixerTriangle:
 ;@----------------------------------------------------------------------------
 	add r10,r10,r9,lsl#8+5
-	mov r1,r10,asr#15
-	eor r1,r1,r10,lsl#1
-	mov r0,r1,lsr#20
 
 	ands r1,r8,#0x3
 	bne noReleaseT
@@ -165,6 +158,9 @@ noAttackT:
 	movcc r8,#3
 
 envDoneT:
+	mov r0,r10,asr#15
+	eor r0,r0,r10,lsl#1
+	mov r0,r0,lsr#20
 	mov r1,r8,lsr#24
 	mul r1,r0,r1			;@ Multiply triangle with envelope
 	mov r1,r1,lsr#4
@@ -175,6 +171,10 @@ envDoneT:
 
 	bx lr
 ;@----------------------------------------------------------------------------
+;@ r4  = attack.
+;@ r5  = decay.
+;@ r6  = sustain.
+;@ r7  = release.
 ;@ r8  = envelope.
 ;@ r9  = frequency.
 ;@ r10 = counter.
@@ -184,27 +184,27 @@ envDoneT:
 ;@----------------------------------------------------------------------------
 mixerNoise:
 ;@----------------------------------------------------------------------------
-	adds r10,r10,r9,lsl#8+9			;@ 8+5
+	adds r10,r10,r9,lsl#8+9			;@ 8+4+5
 	movcs r2,r2,lsl#1
-	eor r0,r2,r2,lsl#5
+	eor r0,r2,r2,lsl#5			;@ Tap bit 17 & 22
 	and r0,r0,#0x00400000
 	orr r2,r2,r0,lsr#22
 	mov r0,#0
-	tst r2,#0x00400000		;@ Bit 22
-	orrne r0,r0,#0x800
 	tst r2,#0x00100000		;@ Bit 20
+	orrne r0,r0,#0x800
+	tst r2,#0x00040000		;@ Bit 18
 	orrne r0,r0,#0x400
-	tst r2,#0x00010000		;@ Bit 16
+	tst r2,#0x00004000		;@ Bit 14
 	orrne r0,r0,#0x200
-	tst r2,#0x00002000		;@ Bit 13
-	orrne r0,r0,#0x100
 	tst r2,#0x00000800		;@ Bit 11
+	orrne r0,r0,#0x100
+	tst r2,#0x00000200		;@ Bit 9
 	orrne r0,r0,#0x080
-	tst r2,#0x00000080		;@ Bit 7
+	tst r2,#0x00000020		;@ Bit 5
 	orrne r0,r0,#0x040
-	tst r2,#0x00000010		;@ Bit 4
-	orrne r0,r0,#0x020
 	tst r2,#0x00000004		;@ Bit 2
+	orrne r0,r0,#0x020
+	tst r2,#0x00000001		;@ Bit 0
 	orrne r0,r0,#0x010
 
 	ands r1,r8,#0x3
@@ -310,7 +310,7 @@ m6581Reset:
 
 	adrl r0,SoundVariables
 	mov r1,#0
-	mov r2,#14						;@ 56/4=14
+	mov r2,#m6581StateSize/4		;@ 56/4=14
 	bl memset_						;@ Clear variables
 
 	ldr r1,=NSEED
@@ -509,7 +509,6 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 	add r10,r8,#PCMWAVSIZE*4
 	bl mixChannels
 
-
 	ldmfd sp!,{r4-r12,pc}
 ;@----------------------------------------------------------------------------
 mixerSelect:
@@ -531,8 +530,10 @@ sidWriteOff:
 ;@----------------------------------------------------------------------------
 sidWrite:
 	adr r2,SoundVariables
+	strb r0,[r2,#m6581LastWrite]
 	and r1,addy,#0x1F
-	strb r0,[r2,r1]
+	cmp r1,#0x19
+	strbmi r0,[r2,r1]
 	cmp r1,#0x04
 	beq setCtrl1
 	cmp r1,#0x0B
@@ -570,16 +571,30 @@ setCtrl3:
 
 ;@----------------------------------------------------------------------------
 sidRead:
+	adr r2,SoundVariables
 	and r1,addy,#0x1F
-	cmp r1,#0x1b
-	beq SID_OSC3_R
+	cmp r1,#0x19
+	beq sidPotXR
+	cmp r1,#0x1A
+	beq sidPotYR
+	cmp r1,#0x1B
+	beq sidOsc3R
+	cmp r1,#0x1C
+	beq sidEnv3R
 	mov r11,r11
+	ldrb r0,[r2,#m6581LastWrite]
+	bx lr
+;@----------------------------------------------------------------------------
+sidPotXR:
+;@----------------------------------------------------------------------------
+;@----------------------------------------------------------------------------
+sidPotYR:
+;@----------------------------------------------------------------------------
 	mov r0,#0
 	bx lr
 ;@----------------------------------------------------------------------------
-SID_OSC3_R:
+sidOsc3R:
 ;@----------------------------------------------------------------------------
-	adr r2,SoundVariables
 	ldr r1,[r2,#m6581Ch3Noise_r]
 	movcs r1,r1,lsl#1
 	eor r0,r1,r1,lsl#5
@@ -606,42 +621,13 @@ SID_OSC3_R:
 
 	bx lr
 ;@----------------------------------------------------------------------------
+sidEnv3R:
+;@----------------------------------------------------------------------------
+	ldrb r0,[r2,#m6581Ch3Envelope+3]
+	bx lr
+;@----------------------------------------------------------------------------
 SoundVariables:
-		.byte 0,0
-		.byte 0,0
-		.byte 0
-		.byte 0		;@ Attack/Decay
-		.byte 0		;@ Sustain/Release
-		.byte 0,0
-		.byte 0,0
-		.byte 0
-		.byte 0		;@ Attack/Decay
-		.byte 0		;@ Sustain/Release
-		.byte 0,0
-		.byte 0,0
-		.byte 0
-		.byte 0		;@ Attack/Decay
-		.byte 0		;@ Sustain/Release
-		.byte 0,0
-		.byte 0		;@ Filter
-		.byte 0		;@ Filtermode/volume
-		.byte 0
-		.byte 0
-		.byte 0
-		.byte 0
-		.skip 3
-
-		.long 0
-		.long 0
-		.long 0
-		.long 0
-		.long 0
-		.long 0
-		.long 0
-		.long 0
-		.long 0
-		.long 0
-
+	.skip m6581Size
 
 mixLength:		.long PCMWAVSIZE
 sidptr:			.long SIDWAV

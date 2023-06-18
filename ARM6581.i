@@ -14,45 +14,48 @@
 m6581Start:
 m6581StateStart:
 m6581Ch1Freq:
-m6581Ch1FreqLo:		.byte 0
-m6581Ch1FreqHi:		.byte 0
+m6581Ch1FreqLo:		.byte 0		;@ 0x00
+m6581Ch1FreqHi:		.byte 0		;@ 0x01
 m6581Ch1PulseW:
-m6581Ch1PulseWLo:	.byte 0
-m6581Ch1PulseWHi:	.byte 0
-m6581Ch1Ctrl:		.byte 0
-m6581Ch1AD:			.byte 0		;@ Attack/Decay
-m6581Ch1SR:			.byte 0		;@ Sustain/Release
+m6581Ch1PulseWLo:	.byte 0		;@ 0x02
+m6581Ch1PulseWHi:	.byte 0		;@ 0x03
+m6581Ch1Ctrl:		.byte 0		;@ 0x04
+m6581Ch1AD:			.byte 0		;@ 0x05 Attack/Decay
+m6581Ch1SR:			.byte 0		;@ 0x06 Sustain/Release
 
 m6581Ch2Freq:
-m6581Ch2FreqLo:		.byte 0
-m6581Ch2FreqHi:		.byte 0
+m6581Ch2FreqLo:		.byte 0		;@ 0x07
+m6581Ch2FreqHi:		.byte 0		;@ 0x08
 m6581Ch2PulseW:
-m6581Ch2PulseWLo:	.byte 0
-m6581Ch2PulseWHi:	.byte 0
-m6581Ch2Ctrl:		.byte 0
-m6581Ch2AD:			.byte 0		;@ Attack/Decay
-m6581Ch2SR:			.byte 0		;@ Sustain/Release
+m6581Ch2PulseWLo:	.byte 0		;@ 0x09
+m6581Ch2PulseWHi:	.byte 0		;@ 0x0A
+m6581Ch2Ctrl:		.byte 0		;@ 0x0B
+m6581Ch2AD:			.byte 0		;@ 0x0C Attack/Decay
+m6581Ch2SR:			.byte 0		;@ 0x0D Sustain/Release
 
 m6581Ch3Freq:
-m6581Ch3FreqLo:		.byte 0
-m6581Ch3FreqHi:		.byte 0
+m6581Ch3FreqLo:		.byte 0		;@ 0x0E
+m6581Ch3FreqHi:		.byte 0		;@ 0x0F
 m6581Ch3PulseW:
-m6581Ch3PulseWLo:	.byte 0
-m6581Ch3PulseWHi:	.byte 0
-m6581Ch3Ctrl:		.byte 0
-m6581Ch3AD:			.byte 0		;@ Attack/Decay
-m6581Ch3SR:			.byte 0		;@ Sustain/Release
+m6581Ch3PulseWLo:	.byte 0		;@ 0x10
+m6581Ch3PulseWHi:	.byte 0		;@ 0x11
+m6581Ch3Ctrl:		.byte 0		;@ 0x12
+m6581Ch3AD:			.byte 0		;@ 0x13 Attack/Decay
+m6581Ch3SR:			.byte 0		;@ 0x14 Sustain/Release
 
 m6581FilterFreq:
-m6581FilterFreqLo:	.byte 0
-m6581FilterFreqHi:	.byte 0
-m6581FilterCtrl:	.byte 0		;@ Filter
-m6581FilterMode:	.byte 0		;@ Filtermode/volume
-m6581Paddle1:		.byte 0
-m6581Paddle2:		.byte 0
-m6581Osc3Rnd:		.byte 0
-m6581Env3Out:		.byte 0
-m6581Unused:		.skip 3
+m6581FilterFreqLo:	.byte 0		;@ 0x15
+m6581FilterFreqHi:	.byte 0		;@ 0x16
+m6581FilterCtrl:	.byte 0		;@ 0x17 Filter
+m6581FilterMode:	.byte 0		;@ 0x18 Filtermode/volume
+m6581Paddle1:		.byte 0		;@ 0x19
+m6581Paddle2:		.byte 0		;@ 0x1A
+m6581Osc3Rnd:		.byte 0		;@ 0x1B
+m6581Env3Out:		.byte 0		;@ 0x1C
+m6581Unused:		.skip 3		;@ 0x1D-0x1F
+
+m6581LastWrite:		.byte 0
+m6581Padding:		.skip 3
 
 m6581Ch1Counter:	.long 0
 m6581Ch2Counter:	.long 0
