@@ -58,7 +58,7 @@ m6581Osc3Rnd:		.byte 0		;@ 0x1B
 m6581Env3Out:		.byte 0		;@ 0x1C
 m6581Unused:		.skip 3		;@ 0x1D-0x1F
 
-m6581LastWrite:		.byte 0
+m6581BusValue:		.byte 0
 m6581Padding:		.skip 3
 
 m6581Ch1Counter:	.long 0

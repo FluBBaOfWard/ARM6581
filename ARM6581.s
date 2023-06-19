@@ -20,7 +20,7 @@
 	.global m6581LoadState
 	.global m6581GetStateSize
 
-#define NSEED	0x7FFFF8		;@ Noise Seed
+#define NSEED	0x7FFFFE		;@ Noise Seed
 
 #define PCMWAVSIZE				640
 
@@ -195,7 +195,7 @@ envDoneT:
 ;@----------------------------------------------------------------------------
 mixerNoise:
 ;@----------------------------------------------------------------------------
-	mov r10,r10,ror#32-4
+	mov r10,r10,ror#32-4	;@ Only count 20 bit instead of 24 for noise.
 noiseLoop:
 	adds r10,r10,r9,lsl#8+4+5
 	movcs r3,r3,lsl#1
@@ -233,9 +233,9 @@ noReleaseN:
 	orrcs r8,r8,#0x00000002	;@ Set decay mode
 	b envDoneN
 noAttackN:
-	cmp r8,r6
+	cmp r8,r6				;@ Sustain value
 	bls envDoneN
-	subs r8,r8,r5			;@ Decay/sustain mode
+	subs r8,r8,r5			;@ Decay mode
 	movcc r8,#3
 
 envDoneN:
@@ -338,6 +338,11 @@ m6581Reset:
 	str r1,[r0,#m6581Ch3Noise]
 	str r1,[r0,#m6581Ch3Noise_r]
 
+	ldr r1,=0x55555500
+	str r1,[r0,#m6581Ch1Counter]
+	str r1,[r0,#m6581Ch2Counter]
+	str r1,[r0,#m6581Ch3Counter]
+
 	ldmfd sp!,{lr}
 	bx lr
 
@@ -387,7 +392,7 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 ;@----------------------------------------------------------------------------
 	;@ Update DMA buffer for PCM
 
-	stmfd sp!,{r4-r12,lr}
+	stmfd sp!,{r4-r11,lr}
 	str r0,mixLength
 	str r1,pcmptr
 
@@ -440,7 +445,7 @@ SID_StartMixer:			;@ r0=length, r1=pointer
 	ldr r1,sidptr
 	bl mixChannels
 
-	ldmfd sp!,{r4-r12,pc}
+	ldmfd sp!,{r4-r11,pc}
 ;@----------------------------------------------------------------------------
 mixerSelect:
 	ldrb r9,[r12,#m6581ChFreqLo]
@@ -460,12 +465,10 @@ mixerSelect:
 	and r7,r6,#0x0F
 	ldr r7,[r2,r7,lsl#2]
 	and r6,r6,#0xF0				;@ Sustain value
+	orr r6,r6,r6,lsr#4
 	mov r6,r6,lsl#24
 
 	ldrb r2,[r12,#m6581ChCtrl]
-	tst r2,#0x01
-	biceq r8,r8,#0x03
-	orrne r8,r8,#0x01
 
 	ldr r11,mixLength
 	tst r2,#0x08				;@ Test bit, not silence.
@@ -486,23 +489,29 @@ sidWriteOff:
 ;@----------------------------------------------------------------------------
 sidWrite:
 	adr r2,SoundVariables
-	strb r0,[r2,#m6581LastWrite]
+	strb r0,[r2,#m6581BusValue]
 	and r1,addy,#0x1F
-	cmp r1,#0x19
-	strbmi r0,[r2,r1]
 	cmp r1,#0x04
 	beq setCtrl1
 	cmp r1,#0x0B
 	beq setCtrl2
 	cmp r1,#0x12
 	beq setCtrl3
+	cmp r1,#0x19
+	strbmi r0,[r2,r1]
 	bx lr
 setCtrl1:
 	tst r0,#0x08
 	ldrne r1,=NSEED
 	strne r1,[r2,#m6581Ch1Noise]
+	ldrb r1,[r2,#m6581Ch1Ctrl]
+	strb r0,[r2,#m6581Ch1Ctrl]
+	eor r1,r1,r0
+	ands r1,#1
+	bxeq lr
 	tst r0,#0x01
 	ldr r1,[r2,#m6581Ch1Envelope]
+	orrne r1,r1,#1
 	biceq r1,r1,#3
 	str r1,[r2,#m6581Ch1Envelope]
 	bx lr
@@ -510,8 +519,14 @@ setCtrl2:
 	tst r0,#0x08
 	ldrne r1,=NSEED
 	strne r1,[r2,#m6581Ch2Noise]
+	ldrb r1,[r2,#m6581Ch2Ctrl]
+	strb r0,[r2,#m6581Ch2Ctrl]
+	eor r1,r1,r0
+	ands r1,#1
+	bxeq lr
 	tst r0,#0x01
 	ldr r1,[r2,#m6581Ch2Envelope]
+	orrne r1,r1,#1
 	biceq r1,r1,#3
 	str r1,[r2,#m6581Ch2Envelope]
 	bx lr
@@ -519,8 +534,14 @@ setCtrl3:
 	tst r0,#0x08
 	ldrne r1,=NSEED
 	strne r1,[r2,#m6581Ch3Noise]
+	ldrb r1,[r2,#m6581Ch3Ctrl]
+	strb r0,[r2,#m6581Ch3Ctrl]
+	eor r1,r1,r0
+	ands r1,#1
+	bxeq lr
 	tst r0,#0x01
 	ldr r1,[r2,#m6581Ch3Envelope]
+	orrne r1,r1,#1
 	biceq r1,r1,#3
 	str r1,[r2,#m6581Ch3Envelope]
 	bx lr
@@ -538,7 +559,7 @@ sidRead:
 	cmp r1,#0x1C
 	beq sidEnv3R
 	mov r11,r11
-	ldrb r0,[r2,#m6581LastWrite]
+	ldrb r0,[r2,#m6581BusValue]
 	bx lr
 ;@----------------------------------------------------------------------------
 sidPotXR:
@@ -546,7 +567,8 @@ sidPotXR:
 ;@----------------------------------------------------------------------------
 sidPotYR:
 ;@----------------------------------------------------------------------------
-	mov r0,#0
+	mov r0,#0xFF
+	strb r0,[r2,#m6581BusValue]
 	bx lr
 ;@----------------------------------------------------------------------------
 sidOsc3R:
@@ -575,11 +597,13 @@ sidOsc3R:
 	tst r1,#0x00000004		;@ Bit 2
 	orrne r0,r0,#0x01
 
+	strb r0,[r2,#m6581BusValue]
 	bx lr
 ;@----------------------------------------------------------------------------
 sidEnv3R:
 ;@----------------------------------------------------------------------------
 	ldrb r0,[r2,#m6581Ch3Envelope+3]
+	strb r0,[r2,#m6581BusValue]
 	bx lr
 ;@----------------------------------------------------------------------------
 SoundVariables:
