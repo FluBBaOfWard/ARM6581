@@ -32,7 +32,7 @@
 ;@----------------------------------------------------------------------------
 
 ;@ r0  = Destination buffer (16bit).
-;@ r1  = .
+;@ r1  = Length.
 ;@ r2  = .
 ;@ r3  = PulseWidth (12bit).
 ;@ r4  = Attack.
@@ -42,7 +42,7 @@
 ;@ r8  = Envelope (Top 8 bits). bit 0 & 1 = mode (adsr).
 ;@ r9  = Frequency.
 ;@ r10 = Counter.
-;@ r11 = Length.
+;@ r11 = .
 ;@ r12 = ChannelPtr.
 ;@ lr = return address.
 ;@----------------------------------------------------------------------------
@@ -79,20 +79,23 @@ envDoneP:
 	movcs r2,r8,lsr#16		;@ Use envelope directly for pulse
 	strh r2,[r0],#2
 
-	subs r11,r11,#1
+	subs r1,r1,#1
 	bhi pulseLoop
 
 	bx lr
 ;@----------------------------------------------------------------------------
 ;@ r0  = Destination buffer (16bit).
-;@ r4  = attack.
-;@ r5  = decay.
-;@ r6  = sustain.
-;@ r7  = release.
-;@ r8  = envelope.
-;@ r9  = frequency.
-;@ r10 = counter.
-;@ r11 = length.
+;@ r1  = Length.
+
+
+;@ r4  = Attack.
+;@ r5  = Decay.
+;@ r6  = Sustain.
+;@ r7  = Release.
+;@ r8  = Envelope.
+;@ r9  = Frequency.
+;@ r10 = Counter.
+;@ r11 = .
 ;@ r12 = ChannelPtr.
 ;@ lr  = return address.
 ;@----------------------------------------------------------------------------
@@ -126,20 +129,23 @@ envDoneS:
 	mov r2,r2,lsr#4
 	strh r2,[r0],#2
 
-	subs r11,r11,#1
+	subs r1,r1,#1
 	bhi sawLoop
 
 	bx lr
 ;@----------------------------------------------------------------------------
 ;@ r0  = Destination buffer (16bit).
-;@ r4  = attack.
-;@ r5  = decay.
-;@ r6  = sustain.
-;@ r7  = release.
-;@ r8  = envelope.
-;@ r9  = frequency.
-;@ r10 = counter.
-;@ r11 = length.
+;@ r1  = Length.
+
+
+;@ r4  = Attack.
+;@ r5  = Decay.
+;@ r6  = Sustain.
+;@ r7  = Release.
+;@ r8  = Evelope.
+;@ r9  = Frequency.
+;@ r10 = Counter.
+;@ r11 = .
 ;@ r12 = ChannelPtr.
 ;@ lr = return address.
 ;@----------------------------------------------------------------------------
@@ -175,21 +181,23 @@ envDoneT:
 	mov r2,r2,lsr#4
 	strh r2,[r0],#2
 
-	subs r11,r11,#1
+	subs r1,r1,#1
 	bhi triangleLoop
 
 	bx lr
 ;@----------------------------------------------------------------------------
 ;@ r0  = Destination buffer (16bit).
+;@ r1  = Length.
+
 ;@ r3  = LFSR.
-;@ r4  = attack.
-;@ r5  = decay.
-;@ r6  = sustain.
-;@ r7  = release.
-;@ r8  = envelope.
-;@ r9  = frequency.
-;@ r10 = counter.
-;@ r11 = length.
+;@ r4  = Attack.
+;@ r5  = Decay.
+;@ r6  = Sustain.
+;@ r7  = Release.
+;@ r8  = Envelope.
+;@ r9  = Frequency.
+;@ r10 = Counter.
+;@ r11 = .
 ;@ r12 = ChannelPtr.
 ;@ lr = return address.
 ;@----------------------------------------------------------------------------
@@ -220,13 +228,13 @@ noiseLoop:
 	tst r3,#0x00000001		;@ Bit 0
 	orrne r2,r2,#0x010
 
-	ands r1,r8,#0x3
+	ands r11,r8,#0x3
 	bne noReleaseN
 	subs r8,r8,r7			;@ Release mode
 	biccc r8,r8,#0xFF000000
 	b envDoneN
 noReleaseN:
-	cmp r1,#1
+	cmp r11,#1
 	bne noAttackN
 	adds r8,r8,r4			;@ Attack mode
 	orrcs r8,r8,#0xFF000000	;@ Clamp to full vol
@@ -239,19 +247,19 @@ noAttackN:
 	movcc r8,#3
 
 envDoneN:
-	mov r1,r8,lsr#24
-	mul r1,r2,r1			;@ Multiply noise with envelope
-	mov r1,r1,lsr#4
-	strh r1,[r0],#2
+	mov r11,r8,lsr#24
+	mul r11,r2,r11			;@ Multiply noise with envelope
+	mov r11,r11,lsr#4
+	strh r11,[r0],#2
 
-	subs r11,r11,#1
+	subs r1,r1,#1
 	bhi noiseLoop
 
 	mov r10,r10,ror#4
 	bx lr
 ;@----------------------------------------------------------------------------
 ;@ r0  = Destination buffer (16bit).
-;@ r11 = length.
+;@ r1  = Length.
 ;@ r12 = ChannelPtr.
 ;@ lr = return address.
 ;@----------------------------------------------------------------------------
@@ -259,13 +267,13 @@ mixerSilence:
 ;@----------------------------------------------------------------------------
 	add r10,r10,r9,lsl#8+5
 
-	ands r1,r8,#0x3
+	ands r2,r8,#0x3
 	bne noReleaseSi
 	subs r8,r8,r7			;@ Release mode
 	biccc r8,r8,#0xFF000000
 	b envDoneSi
 noReleaseSi:
-	cmp r1,#1
+	cmp r2,#1
 	bne noAttackSi
 	adds r8,r8,r4			;@ Attack mode
 	orrcs r8,r8,#0xFF000000	;@ Clamp to full vol
@@ -278,16 +286,17 @@ noAttackSi:
 	movcc r8,#3
 
 envDoneSi:
-	mov r1,#0
-	strh r1,[r0],#2
+	mov r2,#0
+	strh r2,[r0],#2
 
-	subs r11,r11,#1
+	subs r1,r1,#1
 	bhi mixerSilence
 
 	bx lr
 ;@----------------------------------------------------------------------------
 mixChannels:			;@ r0 = dest, r1 = src1, r2 = length, r3 = volume
 ;@----------------------------------------------------------------------------
+	add r3,r3,r3,lsl#2
 	add r7,r1,#PCMWAVSIZE*2
 	add r8,r1,#PCMWAVSIZE*4
 mixLoop:
@@ -297,11 +306,10 @@ mixLoop:
 	add r4,r4,r5
 	add r4,r4,r6
 	mul r5,r4,r3
-	add r5,r5,r5,lsr#2
-//	mov r5,r5,lsr#14		;@ 14
+//	mov r5,r5,lsr#16
 //	eor r5,r5,#0x80
 //	strb r5,[r0],#1
-	mov r5,r5,lsr#6
+	mov r5,r5,lsr#8
 	eor r5,r5,#0x8000
 	strh r5,[r0],#2
 
@@ -470,7 +478,7 @@ mixerSelect:
 
 	ldrb r2,[r12,#m6581ChCtrl]
 
-	ldr r11,mixLength
+	ldr r1,mixLength
 	tst r2,#0x08				;@ Test bit, not silence.
 	bne mixerSilence
 	tst r2,#0x10
